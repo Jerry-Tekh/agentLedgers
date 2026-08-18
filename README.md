@@ -48,6 +48,23 @@ The constructor takes one argument: the address that resolves disputed
 (`pending_review`) deals. Use your own address to start, or swap in a
 dedicated dispute-resolution account/multisig later.
 
+That argument is typed `Address`, and the `0x…` value above is sent as the
+`address` calldata type (a 40-hex value auto-detects as `address`). This is
+not cosmetic: annotating the param `str` instead makes calldata decode fail
+*before* `__init__` runs, and the deploy tx still comes back "successful"
+while writing no code on chain. Always verify the *execution result*, not
+just that the tx was accepted:
+
+```bash
+genlayer code    <deployed-address>              # prints source => executed OK (empty => failed)
+genlayer call    <deployed-address> get_arbiter  # => the arbiter address you passed
+genlayer receipt <tx-hash> --status FINALIZED    # wait for finality
+```
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full root-cause writeup
+and the difference between a transaction's lifecycle status and its
+execution result.
+
 **Alternative: `deploy/deployScript.ts`.** `genlayer deploy` with no
 `--contract` flag globs `deploy/*.ts`/`*.js`, transpiles each with esbuild
 (without bundling), and dynamically imports and runs its default export as
