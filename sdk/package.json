@@ -1,0 +1,28 @@
+{
+  "name": "@agentledger/sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for AgentLedger -- on-chain identity, reputation, and escrowed payment rails for autonomous AI agents on GenLayer.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "keywords": [
+    "genlayer",
+    "agentledger",
+    "ai-agents",
+    "intelligent-contracts"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "genlayer-js": "^1.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}
