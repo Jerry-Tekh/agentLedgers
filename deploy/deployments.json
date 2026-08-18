@@ -1,0 +1,21 @@
+{
+  "$comment": "Canonical record of AgentLedger contract deployments. Values here are verified on-chain (see docs/DEPLOYMENT.md for how). The frontend reads the address/chain from VITE_AGENTLEDGER_CONTRACT_ADDRESS / VITE_AGENTLEDGER_CHAIN at build time -- this file is the source of truth those env vars should mirror.",
+  "deployments": {
+    "testnetBradbury": {
+      "network": "testnet-bradbury",
+      "chainExport": "testnetBradbury",
+      "contractAddress": "0x0eC3d0D9ae1AFBCbf259DD03253697e5F1103BC0",
+      "arbiter": "0x1847d40A1fc2b69101D943f23Ea35bd3774889D7",
+      "txHash": "0xfb93af7515f9f125e725f950c6aac918a0bff7d37f460b8c14505e88d46f9df6",
+      "runner": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6",
+      "status": "FINALIZED",
+      "txExecutionResult": "FINISHED_WITH_RETURN",
+      "validatorVotes": ["AGREE", "AGREE", "AGREE", "AGREE", "AGREE"],
+      "verifiedAt": "2026-08-18",
+      "verified": {
+        "codeOnChain": true,
+        "getArbiterReturns": "0x1847d40A1fc2b69101D943f23Ea35bd3774889D7"
+      }
+    }
+  }
+}
