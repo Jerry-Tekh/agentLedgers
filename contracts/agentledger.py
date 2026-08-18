@@ -139,11 +139,22 @@ class AgentLedger(gl.Contract):
     next_eval_seq: u256
     next_deal_seq: u256
 
-    def __init__(self, arbiter_address: str):
-        try:
-            self.arbiter = Address(arbiter_address)
-        except Exception:
-            raise gl.vm.UserError(f"{ERR_EXPECTED} '{arbiter_address}' is not a valid arbiter address")
+    def __init__(self, arbiter_address: Address):
+        # `genlayer deploy --args <0x…-40-hex>` (and genlayer-js calldata
+        # encoding) type a 40-hex value as the `address` calldata type, so
+        # on-chain this argument arrives already decoded as an `Address`.
+        # Annotating it `str` -- as an earlier revision did -- makes calldata
+        # decoding fail BEFORE __init__ runs: the deploy tx is ACCEPTED, but
+        # its execution result is FINISHED_WITH_ERROR, every validator
+        # DISAGREEs, and no code is written on chain. Direct-mode tests still
+        # call the constructor with a hex `str`, so accept either form here.
+        if isinstance(arbiter_address, Address):
+            self.arbiter = arbiter_address
+        else:
+            try:
+                self.arbiter = Address(arbiter_address)
+            except Exception:
+                raise gl.vm.UserError(f"{ERR_EXPECTED} '{arbiter_address}' is not a valid arbiter address")
         self.next_eval_seq = u256(0)
         self.next_deal_seq = u256(0)
 
