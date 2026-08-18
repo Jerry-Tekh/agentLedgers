@@ -4,3 +4,10 @@ dist/
 .env.local
 *.log
 *.compiled.js
+
+# Local GenLayer deploy diagnostics / scratch contracts -- never committed.
+# These are bisection test contracts and raw CLI dumps used while debugging a
+# deploy; the real contract is contracts/agentledger.py.
+.mintest*
+.receipt.json
+.wc_skill.md
