@@ -22,6 +22,26 @@ genlayer call    <deployed-address> get_arbiter   # => your arbiter address
 genlayer receipt <tx-hash> --status FINALIZED     # wait for finalization
 ```
 
+## Current deployment (Bradbury) — finalized & verified
+
+The canonical deployment, machine-readable in
+[`deploy/deployments.json`](../deploy/deployments.json):
+
+| Field | Value |
+|---|---|
+| Network | `testnet-bradbury` (`testnetBradbury`) |
+| Contract address | `0x0eC3d0D9ae1AFBCbf259DD03253697e5F1103BC0` |
+| Arbiter | `0x1847d40A1fc2b69101D943f23Ea35bd3774889D7` |
+| Deploy tx | `0xfb93af7515f9f125e725f950c6aac918a0bff7d37f460b8c14505e88d46f9df6` |
+| Runner | `py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6` |
+| Lifecycle status | `FINALIZED` |
+| Execution result | `FINISHED_WITH_RETURN` |
+| Validator votes | `AGREE × 5` (unanimous) |
+
+Verified on-chain: `genlayer code` returns the contract source, and
+`genlayer call <addr> get_arbiter` returns the arbiter above — proving
+`__init__` ran and the ABI round-trips.
+
 ## Root cause: the arbiter argument must be typed `Address`, not `str`
 
 The constructor is:
