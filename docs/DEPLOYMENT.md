@@ -105,3 +105,21 @@ genlayer call <deployed-address> get_arbiter     # => the arbiter address you pa
 # then wait for the finality window to close
 genlayer receipt <tx-hash> --status FINALIZED
 ```
+
+## Production environment variables
+
+The frontend is built once per deployment target — it reads the contract
+address and chain from build-time env vars (there is no runtime UI to set
+them). Set these in your host's environment (Vercel/Netlify/etc.) **before**
+`npm run build`. For the canonical Bradbury deployment recorded in
+[`deploy/deployments.json`](../deploy/deployments.json):
+
+```bash
+VITE_AGENTLEDGER_CONTRACT_ADDRESS=0x0eC3d0D9ae1AFBCbf259DD03253697e5F1103BC0
+VITE_AGENTLEDGER_CHAIN=testnetBradbury
+```
+
+`VITE_AGENTLEDGER_CHAIN` must exactly match a chain export name in your
+installed `genlayer-js/chains` (`testnetBradbury` as of genlayer-js@1.2.0).
+`VITE_AGENTLEDGER_CONTRACT_ADDRESS` must pass a `0x` + 40-hex check or the app
+renders its configuration-error screen instead of the directory UI.
