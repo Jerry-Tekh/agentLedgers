@@ -322,6 +322,14 @@ Set both before running `frontend`'s `npm run build`. Neither has a
 runtime/UI fallback — the app is built once per deployment target rather
 than configured by whoever opens it.
 
+For the live, finalized Bradbury deployment (recorded in
+[`deploy/deployments.json`](deploy/deployments.json)):
+
+```bash
+VITE_AGENTLEDGER_CONTRACT_ADDRESS=0x0eC3d0D9ae1AFBCbf259DD03253697e5F1103BC0
+VITE_AGENTLEDGER_CHAIN=testnetBradbury
+```
+
 | Variable | Required | Example | Notes |
 |---|---|---|---|
 | `VITE_AGENTLEDGER_CONTRACT_ADDRESS` | Yes | `0x1234...abcd` | The deployed AgentLedger contract address. Must pass a plain `0x` + 40 hex char check or the app shows the configuration-error screen. |
