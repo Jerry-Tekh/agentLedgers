@@ -19,7 +19,32 @@
 
 import { readFileSync } from "fs";
 import path from "path";
-import { TransactionHash, TransactionStatus, GenLayerClient } from "genlayer-js/types";
+import { CalldataAddress, TransactionHash, TransactionStatus, GenLayerClient } from "genlayer-js/types";
+
+/**
+ * Encode a hex address string as an *address-typed* calldata argument.
+ *
+ * The contract's constructor is `__init__(self, arbiter_address: Address)`, so
+ * the argument has to arrive as the `address` calldata type -- not `str`.
+ * Passing the plain JS string here would encode it as `str` and make GenVM's
+ * calldata decode fail before `__init__` runs (deploy tx ACCEPTED, execution
+ * FINISHED_WITH_ERROR, all validators DISAGREE, no code on chain). genlayer-js
+ * encodes a `CalldataAddress` instance as the `address` type, which is exactly
+ * what the CLI's `--args 0x…` path sends too. See docs/DEPLOYMENT.md.
+ */
+function arbiterCalldata(hex: string): CalldataAddress {
+  const clean = hex.startsWith("0x") || hex.startsWith("0X") ? hex.slice(2) : hex;
+  if (!/^[0-9a-fA-F]{40}$/.test(clean)) {
+    throw new Error(
+      `AGENTLEDGER_ARBITER must be a 20-byte (40 hex char) address like 0x1847…, got: ${hex}`,
+    );
+  }
+  const bytes = new Uint8Array(20);
+  for (let i = 0; i < 20; i++) {
+    bytes[i] = parseInt(clean.slice(i * 2, i * 2 + 2), 16);
+  }
+  return new CalldataAddress(bytes);
+}
 
 export default async function main(client: GenLayerClient<any>) {
   const filePath = path.resolve(process.cwd(), "contracts/agentledger.py");
@@ -43,7 +68,7 @@ export default async function main(client: GenLayerClient<any>) {
 
     const deployTransaction = await client.deployContract({
       code: contractCode,
-      args: [arbiterAddress],
+      args: [arbiterCalldata(arbiterAddress)],
     });
 
     const receipt = await client.waitForTransactionReceipt({
