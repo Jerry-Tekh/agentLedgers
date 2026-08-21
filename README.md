@@ -12,6 +12,71 @@ agentledger-app/
 └── frontend/                    # Vite + React app: agent directory + deal creation UI
 ```
 
+## Where GenLayer is used, and proof it ran on-chain
+
+> **For a reviewer, in one paragraph:** this is not a normal smart contract with
+> an off-chain bot doing the thinking. An **LLM runs _inside_ the contract**, it
+> **fetches a URL from the live web on-chain**, and a **validator quorum must
+> independently agree** on the result before any state changes. Those three
+> things are GenLayer-specific — you cannot do them on a conventional chain.
+> Below is exactly where each one lives, and **real Bradbury testnet
+> transactions** you can open in a block explorer or read back yourself.
+
+### The three GenLayer primitives, by file and line
+
+All three live in [`contracts/agentledger.py`](contracts/agentledger.py):
+
+| GenLayer primitive | What it does | Where |
+|---|---|---|
+| `gl.nondet.web.get(url)` | Fetches the agent's evidence URL / the deliverable URL from the live web, **on-chain** | [`_verify_capabilities` L582](contracts/agentledger.py#L582), [`_evaluate_deliverable` L634](contracts/agentledger.py#L634) |
+| `gl.nondet.exec_prompt(prompt, response_format="json")` | Runs an **LLM inference inside the contract** to judge the capability claim / grade the deliverable | [`_verify_capabilities` L610](contracts/agentledger.py#L610), [`_evaluate_deliverable` L663](contracts/agentledger.py#L663) |
+| `gl.vm.run_nondet_unsafe(leader_fn, validator_fn)` | Runs the two calls above **under validator consensus** — a leader proposes, validators re-run and must agree via the Equivalence Principle before anything is written | [`register_agent` L232](contracts/agentledger.py#L232), [`submit_deliverable` L380](contracts/agentledger.py#L380) |
+
+The "do two independently-produced LLM results agree?" consensus check is itself
+readable code: [`_capability_verdicts_equivalent` L723](contracts/agentledger.py#L723)
+(≥60% token overlap between two capability lists) and
+[`_deal_verdicts_equivalent` L765](contracts/agentledger.py#L765).
+
+### Where the agent does work
+
+`register_agent` → `create_deal` → `submit_deliverable` is a **full autonomous
+agent lifecycle**: an agent registers and is verified, a client hires it and
+escrows GEN, the agent delivers, an **on-chain LLM grades the delivery**, and
+escrow is released (or refunded) based on that verdict — with reputation moving
+accordingly. There is no trusted off-chain judge; the decision is made by the
+contract's intelligent methods under consensus.
+
+### Real on-chain proof (Bradbury testnet)
+
+Contract `0x0eC3d0D9ae1AFBCbf259DD03253697e5F1103BC0`. These are real
+transactions, run end-to-end by
+[`frontend/scripts/onchain_agent_run.mjs`](frontend/scripts/onchain_agent_run.mjs):
+
+| Step | Transaction | On-chain result |
+|---|---|---|
+| `register_agent` | [`0xd7b9516…ecb852`](https://explorer-bradbury.genlayer.com/tx/0xd7b9516714a9a4a1a1ef24cedb9d10bde69b0f5f3099b5842704cecf33ecb852) | web-fetch + LLM + consensus → agent `verified`, confidence `high` |
+| `create_deal` | [`0x7300096…c82025`](https://explorer-bradbury.genlayer.com/tx/0x73000961e623d129b1f539aefb689200897763dd1d674789e22ae008d4c82025) | 0.001 GEN escrowed inside the contract |
+| `submit_deliverable` | [`0xcf0057f…915d49`](https://explorer-bradbury.genlayer.com/tx/0xcf0057f280767262119b9b5cbc222c6d1aeab4ca1642dc652e617a91f6915d49) | on-chain LLM graded it: `llm_accepted: true`, `quality_score: 85`, confidence `high`; escrow released; reputation 50 → 58 |
+
+**Verify the LLM output yourself** — read it straight back off-chain. The
+`notes` field is natural-language critique that no deterministic contract could
+produce:
+
+```bash
+genlayer call 0x0eC3d0D9ae1AFBCbf259DD03253697e5F1103BC0 \
+  get_deal_result --args genlayer-doc-agent deal-readme-review
+# => { llm_accepted: 'true', confidence: 'high', quality_score: 85,
+#      notes: "The deliverable provides a comprehensive README that clearly
+#              documents the system's four core functions... However, it lacks
+#              specific API documentation or example code snippets..." }
+
+# raw GenVM execution trace for the deliverable-grading tx:
+genlayer trace 0xcf0057f280767262119b9b5cbc222c6d1aeab4ca1642dc652e617a91f6915d49
+```
+
+Full evidence — every tx, the exact on-chain state before and after, and the
+GenVM trace — is in [docs/ONCHAIN_ACTIVITY.md](docs/ONCHAIN_ACTIVITY.md).
+
 ## What it does
 
 - **Agents register** a plain-English capability claim plus a public
