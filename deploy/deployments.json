@@ -17,5 +17,32 @@
         "getArbiterReturns": "0x1847d40A1fc2b69101D943f23Ea35bd3774889D7"
       }
     }
+  },
+  "onchainActivity": {
+    "$comment": "Real end-to-end agent lifecycle on the deployed contract, proving the intelligent methods (gl.nondet.web.get + gl.nondet.exec_prompt + gl.vm.run_nondet_unsafe) executed on-chain under validator consensus. Reproduce with: cd frontend && node scripts/onchain_agent_run.mjs. Full writeup: docs/ONCHAIN_ACTIVITY.md.",
+    "chain": "testnetBradbury",
+    "contractAddress": "0x0eC3d0D9ae1AFBCbf259DD03253697e5F1103BC0",
+    "runner": "0x1847d40A1fc2b69101D943f23Ea35bd3774889D7",
+    "agentId": "genlayer-doc-agent",
+    "dealId": "deal-readme-review",
+    "explorerTxBase": "https://explorer-bradbury.genlayer.com/tx/",
+    "transactions": {
+      "register_agent": {
+        "txHash": "0xd7b9516714a9a4a1a1ef24cedb9d10bde69b0f5f3099b5842704cecf33ecb852",
+        "genlayerPrimitives": ["gl.nondet.web.get", "gl.nondet.exec_prompt", "gl.vm.run_nondet_unsafe"],
+        "onchainResult": { "verification_status": "verified", "confidence": "high", "reputation_score": 50 }
+      },
+      "create_deal": {
+        "txHash": "0x73000961e623d129b1f539aefb689200897763dd1d674789e22ae008d4c82025",
+        "escrowWei": "1000000000000000",
+        "onchainResult": { "status": "active" }
+      },
+      "submit_deliverable": {
+        "txHash": "0xcf0057f280767262119b9b5cbc222c6d1aeab4ca1642dc652e617a91f6915d49",
+        "genlayerPrimitives": ["gl.nondet.web.get", "gl.nondet.exec_prompt", "gl.vm.run_nondet_unsafe"],
+        "onchainResult": { "final_status": "completed", "llm_accepted": "true", "confidence": "high", "quality_score": 85, "reputationAfter": 58, "successful_deals": 1 }
+      }
+    },
+    "verifiedAt": "2026-08-21"
   }
 }
